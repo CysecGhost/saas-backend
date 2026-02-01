@@ -8,13 +8,10 @@ const PORT = Number(process.env.PORT) || 3000;
 const app = express();
 
 app.use(cors());
-app.use(express.json())
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get("/health", (req, res) => {
-    res.json({ status: "okie dokie"})
-})
-
-app.use("/api/auth", authRoutes);
+app.use("/auth", authRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
