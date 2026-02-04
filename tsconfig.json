@@ -12,6 +12,7 @@
     "target": "ES2023",
     "esModuleInterop": true,
     "types": [],
+    "typeRoots": ["./src/types", "./node_modules/@types"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
