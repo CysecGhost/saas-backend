@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 import { hashPassword, verifyPassword } from "../lib/hash.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../lib/jwt.js";
+import AppError from "../lib/AppError.js";
 import bcrypt from "bcrypt";
 
 type TokenPayload = {
@@ -20,10 +21,10 @@ export const registerUser = async (email: string, password: string) => {
 
 export const loginUser = async (email: string, password: string) => {
     const user = await prisma.user.findUnique({ where: { email }});
-    if (!user) throw new Error("User not found");
+    if (!user) throw new AppError("User not found", 404);
 
     const valid =  await verifyPassword(password, user.password);
-    if (!valid) throw new Error("Invalid credentials");
+    if (!valid) throw new AppError("Invalid credentials", 401);
 
     const accessToken = signAccessToken( { userId: user.id } );
     const refreshToken = signRefreshToken( { userId: user.id } )
@@ -51,7 +52,7 @@ export const refreshAccessToken = async (token: string) => {
     });
 
     if (!storedTokens.length) {
-        throw new Error("Refresh token invalid");
+        throw new AppError("Refresh token invalid", 401);
     }
 
     let matchedToken: any = null;
@@ -64,7 +65,7 @@ export const refreshAccessToken = async (token: string) => {
     };
     
     if (!matchedToken) {
-        throw new Error("Refresh token invalid");
+        throw new AppError("Refresh token invalid", 401);
     }
 
     return signAccessToken({userId: matchedToken.userId});
@@ -80,7 +81,7 @@ export const logoutUser = async (token: string) => {
     });
 
     if (!storedTokens.length) {
-        throw new Error("Refresh token invalid");
+        throw new AppError("Refresh token invalid", 401);
     }
 
     let matchedToken: any = null;
@@ -93,7 +94,7 @@ export const logoutUser = async (token: string) => {
     };
     
     if (!matchedToken) {
-        throw new Error("Refresh token invalid");
+        throw new AppError("Refresh token invalid", 401);
     }
 
     const revoked = await prisma.refreshToken.update({

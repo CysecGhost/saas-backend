@@ -3,6 +3,7 @@ import cors from "cors";
 import "dotenv/config";
 import authRoutes from "./routes/authRoutes";
 import cookieParser from "cookie-parser";
+import errorHandler from "./middlewares/errorHandler";
 
 const PORT = Number(process.env.PORT) || 3000;
 
@@ -14,6 +15,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRoutes);
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
