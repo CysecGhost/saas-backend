@@ -12,7 +12,7 @@ export const register = asyncHandler(async (req: Request, res: Response) => {
 export const login = asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
     
-    const {accessToken, refreshToken} = await authService.loginUser(email, password);
+    const { accessToken, refreshToken } = await authService.loginUser(email, password);
 
     res.cookie("refreshToken", refreshToken, {
         path: "/auth/refresh",
@@ -32,7 +32,15 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
         throw new AppError("No refresh token", 401);
     }
     
-    const accessToken = await authService.refreshAccessToken(token);
+    const { accessToken, refreshToken} = await authService.refreshAccessToken(token);
+
+    res.cookie("refreshToken", refreshToken, {
+        path: "/auth/refresh",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     res.json({ accessToken });
 });

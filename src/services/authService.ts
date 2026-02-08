@@ -44,6 +44,8 @@ export const loginUser = async (email: string, password: string) => {
 
 export const refreshAccessToken = async (token: string) => {
     const payload = verifyRefreshToken(token) as TokenPayload;
+
+    // fetch all refresh tokens of user
     const storedTokens = await prisma.refreshToken.findMany({
         where: {
             userId: payload.userId,
@@ -53,10 +55,11 @@ export const refreshAccessToken = async (token: string) => {
 
     if (!storedTokens.length) {
         throw new AppError("Refresh token invalid", 401);
-    }
+    };
 
-    let matchedToken: any = null;
+    let matchedToken: typeof storedTokens[number] | null = null;
 
+    // fetch the token the user sent
     for(const t of storedTokens) {
         if(await bcrypt.compare(token, t.tokenHash)){
             matchedToken = t;
@@ -64,12 +67,47 @@ export const refreshAccessToken = async (token: string) => {
         }
     };
     
+    // Revoke all tokens on token reuse attempt
     if (!matchedToken) {
-        throw new AppError("Refresh token invalid", 401);
-    }
+        await prisma.refreshToken.updateMany({
+            where: {
+                userId: payload.userId,
+            },
+            data: {
+                revoked: true,
+            },
+        });
 
-    return signAccessToken({userId: matchedToken.userId});
-}
+        throw new AppError("Refresh token reuse detected", 401);
+    };
+    
+    // revoke current token
+    await prisma.refreshToken.update({
+        where: {
+            id: matchedToken.id,
+        },
+        data: {
+            revoked: true,
+        },
+    });
+
+    // issue new access token and refresh token
+    const accessToken = signAccessToken({userId: matchedToken.userId});
+    const refreshToken = signRefreshToken({ userId: matchedToken.userId });
+
+    const tokenHash = await bcrypt.hash(refreshToken, 12)
+
+    // store new refresh token in db
+    await prisma.refreshToken.create({
+        data: {
+            tokenHash,
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            userId: matchedToken.userId,
+        },
+    });
+
+    return { accessToken, refreshToken };
+};
 
 export const logoutUser = async (token: string) => {
     const payload = verifyRefreshToken(token) as TokenPayload;

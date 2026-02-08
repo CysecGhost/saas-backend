@@ -6,13 +6,13 @@ type AccessTokenPayload = {
     userId: string;
 }
 
-const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
+const authMiddleware = (req: Request, _: Response, next: NextFunction) => {
     const header = req.headers.authorization;
     if (!header || !header.startsWith("Bearer ")) {
         return next(new AppError("Unauthorized", 401));
     };
 
-    const token = header?.split(" ")[1];
+    const token = header.split(" ")[1];
     
     try {
         const payload = verifyAccessToken(token!) as AccessTokenPayload;
