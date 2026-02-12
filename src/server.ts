@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import authRoutes from "./routes/authRoutes";
+import orgRoutes from "./routes/orgRoutes";
+import authMiddleware from "./middlewares/authMiddleware";
 import cookieParser from "cookie-parser";
 import errorHandler from "./middlewares/errorHandler";
 
@@ -15,6 +17,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRoutes);
+app.use("/orgs", authMiddleware, orgRoutes);
 
 app.use(errorHandler);
 
