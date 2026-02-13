@@ -27,3 +27,14 @@ export const getOrgs = asyncHandler ( async (req: Request, res: Response) => {
     res.json({ orgs })
 });
 
+export const inviteUser = asyncHandler ( async (req: Request, res: Response) => {
+    const { email, role} = req.body;
+
+    if (!req.org?.id) {
+        throw new AppError("Organization context missing", 400)
+    }
+
+    const { membership } = await orgService.inviteUser(req.org.id, email, role);
+
+    res.json({ membership });
+});
