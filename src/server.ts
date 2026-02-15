@@ -3,6 +3,7 @@ import cors from "cors";
 import "dotenv/config";
 import authRoutes from "./routes/authRoutes";
 import orgRoutes from "./routes/orgRoutes";
+import productRoutes from "./routes/productRoutes";
 import authMiddleware from "./middlewares/authMiddleware";
 import cookieParser from "cookie-parser";
 import errorHandler from "./middlewares/errorHandler";
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/auth", authRoutes);
 app.use("/orgs", authMiddleware, orgRoutes);
+app.use("/products", authMiddleware, productRoutes);
 
 app.use(errorHandler);
 

@@ -5,7 +5,6 @@ import AppError from "../lib/AppError";
 
 export const validate = <T extends ZodTypeAny>(schema: T) => (req: Request, _: Response, next: NextFunction) => {
     try {
-        
         const parsed = schema.parse({
             body: req.body,
             query: req.query,

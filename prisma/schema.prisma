@@ -35,17 +35,17 @@ model Organization {
   createdAt   DateTime      @default(now())
 
   memberships Membership[]
+  products    Product[]
 }
 
 model Membership {
   id     String @id @default(uuid())
   role   Role
-
   userId String
   orgId  String
 
-  user User @relation(fields: [userId], references: [id])
-  org  Organization @relation(fields: [orgId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
+  org    Organization @relation(fields: [orgId], references: [id])
 
   @@unique([userId, orgId])
 }
@@ -55,8 +55,21 @@ model RefreshToken {
   tokenHash  String
   expiresAt  DateTime
   revoked    Boolean  @default(false)
+  userId     String
 
-  userId String
-  user   User @relation(fields: [userId], references: [id])
+  user       User @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  price     Float
+  orgId     String
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([orgId])
+  @@unique([id, orgId])
 }
 
