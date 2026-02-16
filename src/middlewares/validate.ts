@@ -1,9 +1,9 @@
-import type { ZodTypeAny } from "zod";
+import type { ZodType } from "zod";
 import type { Request, Response, NextFunction } from "express";
 import AppError from "../lib/AppError";
 
 
-export const validate = <T extends ZodTypeAny>(schema: T) => (req: Request, _: Response, next: NextFunction) => {
+export const validate = <T extends ZodType>(schema: T) => (req: Request, _: Response, next: NextFunction) => {
     try {
         const parsed = schema.parse({
             body: req.body,

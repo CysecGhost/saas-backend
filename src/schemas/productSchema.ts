@@ -22,3 +22,13 @@ export const productIdParamSchema = z.object({
     id: z.cuid("Invalid product id"),
   }),
 });
+
+export const getProductsQuerySchema = z.object({
+  query: z.object({
+    page: z.coerce.number().min(1).default(1),
+    limit: z.coerce.number().min(1).max(100).default(10),
+    search: z.string().trim().optional(),
+    sort: z.enum(["name", "price", "createdAt"]).optional(),
+    order: z.enum(["asc", "desc"]).optional(),
+  }),
+});

@@ -1,5 +1,10 @@
 import { prisma } from "../lib/prisma.js";
+import { Prisma } from "../../generated/prisma/index.js";
 import AppError from "../lib/AppError.js";
+
+// Define types for sorting
+type ProductSortField = "name" | "price" | "createdAt";
+type SortOrder = "asc" | "desc";
 
 export const createProduct = async (name: string, price: number, orgId: string) => {
     const product = await prisma.product.create({
@@ -13,14 +18,41 @@ export const createProduct = async (name: string, price: number, orgId: string) 
     return { product };
 };
 
-export const getProducts = async (orgId: string) => {
+export const getProducts = async (orgId: string, page: number, limit: number, skip: number, search?: string, sort?: ProductSortField, order?: SortOrder) => {
+    const where = {
+        orgId,
+        ...(search && {
+            name: {
+                contains: search,
+                mode: Prisma.QueryMode.insensitive,
+            },
+       }),
+    };
+
     const products = await prisma.product.findMany({
-        where: {
-            orgId,
-        },
+        where,
+        orderBy: sort 
+        ? { [sort]: order ?? "asc" }
+        : { createdAt: "desc" },
+        skip,
+        take: limit,
     });
 
-    return { products };
+    const total = await prisma.product.count({
+        where,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    return { 
+        products,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages,
+        },
+    };
 };
 
 export const getProductById = async (id: string, orgId: string) => {

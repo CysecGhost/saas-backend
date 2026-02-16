@@ -1,6 +1,11 @@
 import type { Request, Response } from "express";
-import * as productService from "../services/productService";
+import z from "zod";
+import * as productService from "../services/productService.js";
+import { getProductsQuerySchema } from "../schemas/productSchema.js";
 import asyncHandler from "express-async-handler";
+
+// Infer the type of the query parameters for getProducts from the Zod schema
+type getProductsQuery = z.infer<typeof getProductsQuerySchema>["query"];
 
 export const createProduct = asyncHandler (async (req: Request, res: Response) => {
     const { name, price } = req.body;
@@ -13,14 +18,17 @@ export const createProduct = asyncHandler (async (req: Request, res: Response) =
 
 export const getProducts = asyncHandler (async (req: Request, res: Response) => {
     const orgId = req.org?.id!;
+    const query = req.validated?.query as getProductsQuery;
+    const { page, limit, search, sort, order } = query;
+    const skip = (page - 1) * limit;
 
-    const { products } = await productService.getProducts(orgId);
+    const { products, pagination } = await productService.getProducts(orgId, page, limit, skip, search, sort, order);
 
-    res.json({ products });
+    res.json({ products, pagination });
 });
 
 export const getProductById = asyncHandler (async (req: Request, res: Response) => {
-    const { id }: any = req.params;
+    const id = req.params.id as string;
     const orgId = req.org?.id!;
 
     const { product } = await productService.getProductById(id, orgId);
