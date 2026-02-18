@@ -19,3 +19,9 @@ export const getOrdersQuerySchema = z.object({
         status: z.enum(Status).optional(),
     }),
 });
+
+export const orderIdParamSchema = z.object({
+  params: z.object({
+    id: z.cuid("Invalid order id"),
+  }),
+});

@@ -91,6 +91,7 @@ model Order {
   items     OrderItem[]
 
   @@index([orgId])
+  @@unique([id, orgId])
 }
 
 model OrderItem {

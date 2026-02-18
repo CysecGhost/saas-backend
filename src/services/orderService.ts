@@ -93,3 +93,23 @@ export const getOrders = async (orgId: string, page: number, limit: number, skip
         },
     };
 };
+
+export const getOrderById = async (orgId: string, id:string) => {
+    const order = await prisma.order.findUnique({
+        where: {
+            id_orgId: {
+                id,
+                orgId,
+            }
+        },
+        include: {
+            items: true,
+        },
+    });
+
+    if (!order) {
+        throw new AppError("Order not found", 404);
+    };
+
+    return  { order };
+};
