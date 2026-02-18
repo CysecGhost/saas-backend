@@ -1,6 +1,5 @@
 import { Router } from "express";
-import orgMiddleware from "../middlewares/orgMiddleware.js";
-import { requireRole } from "../middlewares/orgMiddleware.js";
+import orgMiddleware, { requireRole } from "../middlewares/orgMiddleware.js";
 import { validate } from "../middlewares/validate.js";
 import { createProductSchema, updateProductSchema, productIdParamSchema, getProductsQuerySchema } from "../schemas/productSchema.js";
 import { createProduct, getProducts, getProductById, updateProduct, deleteProduct } from "../controllers/productController.js";

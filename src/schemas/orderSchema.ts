@@ -1,4 +1,5 @@
 import z from "zod";
+import { Status } from "../../generated/prisma";
 
 export const createOrderSchema = z.object({
     body: z.object({
@@ -9,4 +10,12 @@ export const createOrderSchema = z.object({
             })
         ).min(1, "Order must contain atleast one item")
     })
-})
+});
+
+export const getOrdersQuerySchema = z.object({
+    query: z.object({
+        page: z.coerce.number().positive().min(1).default(1),
+        limit: z.coerce.number().min(1).max(100).default(10),
+        status: z.enum(Status).optional(),
+    }),
+});

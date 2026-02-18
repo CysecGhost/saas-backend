@@ -2,8 +2,7 @@ import { Router } from "express";
 import { createOrg, getOrgs, inviteUser } from "../controllers/orgController.js";
 import { validate } from "../middlewares/validate.js";
 import { createOrgSchema, inviteUserSchema } from "../schemas/orgSchema.js";
-import orgMiddleware from "../middlewares/orgMiddleware.js";
-import { requireRole } from "../middlewares/orgMiddleware.js";
+import orgMiddleware, { requireRole } from "../middlewares/orgMiddleware.js";
 
 const router = Router();
 

@@ -1,9 +1,10 @@
 import z from "zod";
 import { prisma } from "../lib/prisma.js";
 import { createOrderSchema } from "../schemas/orderSchema.js";
+import { Status } from "../../generated/prisma/index.js";
 import AppError from "../lib/AppError.js";
 
-// Infer the type of the query parameters for getProducts from the Zod schema
+// Infer the type of the parameters from the Zod schema
 type createOrderBody = z.infer<typeof createOrderSchema>["body"]["items"];
 
 export const createOrder = async (orgId: string, items: createOrderBody) => {
@@ -60,4 +61,35 @@ export const createOrder = async (orgId: string, items: createOrderBody) => {
 
         return { order };
     });
+};
+
+export const getOrders = async (orgId: string, page: number, limit: number, skip: number, status?: Status) => {
+    const where = {
+        orgId,
+        ...(status && {
+            status,
+        }),
+    };
+
+    const orders = await prisma.order.findMany({
+        where,
+        skip,
+        take: limit,
+    });
+
+    const total = await prisma.order.count({
+        where,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+        orders,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages,
+        },
+    };
 };

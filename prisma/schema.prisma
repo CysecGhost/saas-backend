@@ -19,6 +19,12 @@ enum Role {
   MEMBER
 }
 
+enum Status {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id           String        @id @default(uuid())
   email        String        @unique
@@ -75,10 +81,11 @@ model Product {
 }
 
 model Order {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   orgId     String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   total     Float
+  status    Status    @default(PENDING)
 
   org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   items     OrderItem[]
