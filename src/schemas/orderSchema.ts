@@ -25,3 +25,9 @@ export const orderIdParamSchema = z.object({
     id: z.cuid("Invalid order id"),
   }),
 });
+
+export const updateOrderStatusSchema = z.object({
+    body: z.object({
+        status: z.enum(Status),
+    }),
+});

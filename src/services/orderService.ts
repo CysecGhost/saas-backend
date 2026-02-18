@@ -75,6 +75,9 @@ export const getOrders = async (orgId: string, page: number, limit: number, skip
         where,
         skip,
         take: limit,
+        include: {
+            items: true,
+        },
     });
 
     const total = await prisma.order.count({
@@ -112,4 +115,34 @@ export const getOrderById = async (orgId: string, id:string) => {
     };
 
     return  { order };
+};
+
+export const updateOrderStatus = async (orgId: string, id:string, status: Status) => {
+    const where = {
+        id_orgId: {
+            id,
+            orgId,
+        }
+    };
+
+    const order = await prisma.order.findUnique({
+        where,
+    });
+
+    if (!order) {
+        throw new AppError("Order not found", 404);
+    };
+
+    if (order.status === "COMPLETED") {
+        throw new AppError("Order already completed; status cannot be changed", 409);
+    };
+
+    const updatedOrder = await prisma.order.update({
+        where,
+        data: {
+            status,
+        },
+    });
+
+    return { updatedOrder };
 };
