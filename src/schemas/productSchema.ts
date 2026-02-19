@@ -4,6 +4,7 @@ export const createProductSchema = z.object({
   body: z.object({
     name: z.string().trim().min(1, "Product name is required"),
     price: z.coerce.number().positive("Price must be greater than 0"),
+    stock: z.coerce.number().int().nonnegative("Stock must be a non-negative integer").default(0),
   }),
 });
 
@@ -11,8 +12,9 @@ export const updateProductSchema = z.object({
   body: z.object({
     name: z.string().trim().min(1).optional(),
     price: z.coerce.number().positive().optional(),
+    stock: z.coerce.number().int().nonnegative().optional(),
   }).refine(
-    (data) => data.name !== undefined || data.price !== undefined,
+    (data) => data.name !== undefined || data.price !== undefined || data.stock !== undefined,
     { message: "At least one field must be provided" }
   ),
 });

@@ -8,10 +8,10 @@ import asyncHandler from "express-async-handler";
 type getProductsQuery = z.infer<typeof getProductsQuerySchema>["query"];
 
 export const createProduct = asyncHandler (async (req: Request, res: Response) => {
-    const { name, price } = req.body;
+    const { name, price, stock } = req.body;
     const orgId = req.org?.id!;
 
-    const { product } = await productService.createProduct(name, price, orgId);
+    const { product } = await productService.createProduct(orgId, name, price, stock);
 
     res.status(201).json({ product });
 });
@@ -38,10 +38,10 @@ export const getProductById = asyncHandler (async (req: Request, res: Response) 
 
 export const updateProduct = asyncHandler (async (req: Request, res: Response) => {
     const id = req.params.id as string;
-    const { name, price } = req.body;
+    const { name, price, stock } = req.body;
     const orgId = req.org?.id!;
 
-    const { product } = await productService.updateProduct(id, name, price, orgId);
+    const { product } = await productService.updateProduct(id, orgId, name, price, stock);
 
     res.json({ product });
 });

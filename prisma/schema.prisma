@@ -68,10 +68,11 @@ model RefreshToken {
 }
 
 model Product {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   name      String
   price     Float
   orgId     String
+  stock     Int         @default(0)
 
   org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())

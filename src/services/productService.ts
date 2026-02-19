@@ -6,12 +6,13 @@ import AppError from "../lib/AppError.js";
 type ProductSortField = "name" | "price" | "createdAt";
 type SortOrder = "asc" | "desc";
 
-export const createProduct = async (name: string, price: number, orgId: string) => {
+export const createProduct = async (orgId: string, name: string, price: number, stock?: number) => {
     const product = await prisma.product.create({
         data: {
             name,
             price,
             orgId,
+            stock: stock ?? 0,
         }
     });
 
@@ -72,7 +73,7 @@ export const getProductById = async (id: string, orgId: string) => {
     return { product };
 };
 
-export const updateProduct = async (id: string, name: string, price: number, orgId: string) => {
+export const updateProduct = async (id: string, orgId: string, name?: string, price?: number, stock?: number) => {
     const product = await prisma.product.update({
         where: {
             id_orgId: {
@@ -81,8 +82,15 @@ export const updateProduct = async (id: string, name: string, price: number, org
             },
         },
         data: {
-            name,
-            price,
+            ...(name !== undefined && {
+                name,
+            }),
+            ...(price !== undefined && {
+                price,
+            }),
+            ...(stock !== undefined && {
+                stock,
+            }),
         },
     });
 

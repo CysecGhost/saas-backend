@@ -36,6 +36,11 @@ export const createOrder = async (orgId: string, items: createOrderBody) => {
         const orderItemsData = items.map((item) => {
             const product = products.find(p => p.id === item.productId)!;
 
+            // Check stock
+            if (item.quantity > product.stock) {
+                throw new AppError("Not enough stock", 400);
+            };
+
             total += product.price * item.quantity;
 
             return {
@@ -58,6 +63,21 @@ export const createOrder = async (orgId: string, items: createOrderBody) => {
                 items: true,
             },
         });
+
+        // Decrement stock
+        for (const item of items) {
+            const product = products.find(p => p.id === item.productId)!;
+            await tx.product.update({
+                where: {
+                    orgId,
+                    id: product.id,
+                    stock: { gte: item.quantity },
+                },
+                data: {
+                    stock: { decrement: item.quantity}
+                }
+            });
+        };
 
         return { order };
     });
