@@ -25,6 +25,9 @@ export const createOrder = async (orgId: string, items: createOrderBody) => {
             },
         });
 
+        // Create a map for easy lookup 
+        const productMap = new Map(products.map(p => [p.id, p]));
+
         // Validate all products exist
         if (products.length !== productIds.length) {
             throw new AppError("One or more products not found", 404);
@@ -34,7 +37,7 @@ export const createOrder = async (orgId: string, items: createOrderBody) => {
         let total = 0;
 
         const orderItemsData = items.map((item) => {
-            const product = products.find(p => p.id === item.productId)!;
+            const product = productMap.get(item.productId)!;
 
             // Check stock
             if (item.quantity > product.stock) {
@@ -65,9 +68,10 @@ export const createOrder = async (orgId: string, items: createOrderBody) => {
         });
 
         // Decrement stock
-        for (const item of items) {
-            const product = products.find(p => p.id === item.productId)!;
-            await tx.product.update({
+        await Promise.all(items.map(async (item) => {
+            const product = productMap.get(item.productId)!;
+
+            const result = await tx.product.updateMany({
                 where: {
                     orgId,
                     id: product.id,
@@ -77,7 +81,11 @@ export const createOrder = async (orgId: string, items: createOrderBody) => {
                     stock: { decrement: item.quantity}
                 }
             });
-        };
+
+            if (result.count === 0) {
+                throw new AppError("Not enough stock", 400);
+            };
+        }));
 
         return { order };
     });
@@ -153,8 +161,8 @@ export const updateOrderStatus = async (orgId: string, id:string, status: Status
         throw new AppError("Order not found", 404);
     };
 
-    if (order.status === "COMPLETED") {
-        throw new AppError("Order already completed; status cannot be changed", 409);
+    if (order.status !== "PENDING") {
+        throw new AppError("Order is not pending; status cannot be changed", 409);
     };
 
     const updatedOrder = await prisma.order.update({
@@ -165,4 +173,73 @@ export const updateOrderStatus = async (orgId: string, id:string, status: Status
     });
 
     return { updatedOrder };
+};
+
+export const cancelOrder = async (orgId: string, id:string) => {
+    return await prisma.$transaction(async (tx) => {
+        const where = {
+            id_orgId: {
+                id,
+                orgId,
+            },
+        };
+
+        const order = await tx.order.findUnique({
+            where,
+            include: {
+                items: true,
+            },
+        });
+
+        if (!order) {
+            throw new AppError("Order not found", 404);
+        };
+
+        // Only pending orders can be cancelled
+        if (order.status !== "PENDING") {
+            throw new AppError("Order is not pending; status cannot be changed", 409);
+        };
+
+        // Cancel order
+        const result = await tx.order.updateMany({
+            where: {
+                orgId,
+                id,
+                status: "PENDING",
+            },
+            data: {
+                status: "CANCELLED",
+            },
+        });
+
+        if (result.count === 0) {
+            throw new AppError("Order is not pending; status cannot be changed", 409);
+        };
+
+        // Restore stock
+        const items = order.items;
+
+        await Promise.all(items.map(item => {
+            return tx.product.update({
+                where: {
+                    id_orgId: {
+                        orgId,
+                        id: item.productId,
+                    },
+                },
+                data: {
+                    stock: { increment: item.quantity },
+                },
+            });
+        }));
+
+        const updatedOrder = await tx.order.findUnique({
+            where,
+            include: {
+                items: true,
+            },
+        });
+
+        return { updatedOrder };
+    });
 };

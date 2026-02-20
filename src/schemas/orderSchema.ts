@@ -26,7 +26,7 @@ export const orderIdParamSchema = z.object({
   }),
 });
 
-export const updateOrderStatusSchema = z.object({
+export const orderStatusSchema = z.object({
     body: z.object({
         status: z.enum(Status),
     }),
