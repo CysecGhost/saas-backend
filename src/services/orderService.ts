@@ -243,3 +243,55 @@ export const cancelOrder = async (orgId: string, id:string) => {
         return { updatedOrder };
     });
 };
+
+export const completeOrder = async (orgId: string, id:string) => {
+    return await prisma.$transaction(async (tx) => {
+        const where = {
+            id_orgId: {
+                id,
+                orgId,
+            },
+        };
+
+        const order = await tx.order.findUnique({
+            where,
+            include: {
+                items: true,
+            },
+        });
+
+        if (!order) {
+            throw new AppError("Order not found", 404);
+        };
+
+        // Only pending orders can be completed
+        if (order.status !== "PENDING") {
+            throw new AppError("Order is not pending; status cannot be changed", 409);
+        };
+
+        // Complete order
+        const result = await tx.order.updateMany({
+            where: {
+                orgId,
+                id,
+                status: "PENDING",
+            },
+            data: {
+                status: "COMPLETED",
+            },
+        });
+
+        if (result.count === 0) {
+            throw new AppError("Order is not pending; status cannot be changed", 409);
+        };
+
+        const updatedOrder = await tx.order.findUnique({
+            where,
+            include: {
+                items: true,
+            },
+        });
+
+        return { updatedOrder };
+    });
+};

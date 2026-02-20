@@ -62,3 +62,13 @@ export const cancelOrder = asyncHandler (async (req: Request, res: Response) => 
 
     res.status(201).json({ updatedOrder });
 });
+
+export const completeOrder = asyncHandler (async (req: Request, res: Response) => {
+    const orgId = req.org?.id!;
+    const params = req.validated?.params as orderIdParam;
+    const { id } = params;
+
+    const { updatedOrder } = await orderService.completeOrder(orgId, id)
+
+    res.status(201).json({ updatedOrder });
+});
