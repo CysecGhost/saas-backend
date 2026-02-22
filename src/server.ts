@@ -4,7 +4,8 @@ import "dotenv/config";
 import authRoutes from "./routes/authRoutes";
 import orgRoutes from "./routes/orgRoutes";
 import productRoutes from "./routes/productRoutes";
-import orderRoutes from "./routes/orderRoutes"
+import orderRoutes from "./routes/orderRoutes";
+import analyticsRoutes from "./routes/analyticsRoutes";
 import authMiddleware from "./middlewares/authMiddleware";
 import cookieParser from "cookie-parser";
 import errorHandler from "./middlewares/errorHandler";
@@ -22,6 +23,7 @@ app.use("/auth", authRoutes);
 app.use("/orgs", authMiddleware, orgRoutes);
 app.use("/products", authMiddleware, productRoutes);
 app.use("/orders", authMiddleware, orderRoutes);
+app.use("/analytics", authMiddleware, analyticsRoutes);
 
 app.use(errorHandler);
 
