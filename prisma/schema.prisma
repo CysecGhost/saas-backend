@@ -91,7 +91,7 @@ model Order {
   org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   items     OrderItem[]
 
-  @@index([orgId])
+  @@index([orgId, status, createdAt])
   @@unique([id, orgId])
 }
 
@@ -103,4 +103,7 @@ model OrderItem {
   price     Float  // snapshot price
 
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  @@index([orderId])
+  @@index([productId])
 }

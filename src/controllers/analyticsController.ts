@@ -24,3 +24,12 @@ export const getDailyRevenueTrend = asyncHandler(async (req: Request, res: Respo
 
     res.json({ trend });
 });
+
+
+export const getTopSellingProducts = asyncHandler(async (req: Request, res: Response) => {
+    const orgId = req.org?.id!;
+
+    const topSellingProducts = await analyticsService.getTopSellingProducts(orgId);
+
+    res.json({ topSellingProducts });
+});

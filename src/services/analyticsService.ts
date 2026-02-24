@@ -46,10 +46,31 @@ export const getDailyRevenueTrend = async (orgId: string) => {
     FROM "Order"
     WHERE
         "orgId" = ${orgId}
-        AND status = 'COMPLETED'
+        AND "status" = 'COMPLETED'
     GROUP BY DATE("createdAt")
     ORDER BY date ASC
     `;
 
     return trend;
+};
+
+export const getTopSellingProducts = async (orgId: string) => {
+    const topSellingProducts = await prisma.$queryRaw<{ id: string, name: string, totalSold: number }[]
+    >`
+    SELECT
+        p.id,
+        p.name,
+        SUM(oi.quantity) as totalSold
+    FROM "OrderItem" oi
+    JOIN "Order" o ON oi."orderId" = o.id
+    JOIN "Product" p ON oi."productId" = p.id
+    WHERE
+        o."orgId" = ${orgId}
+        AND o."status" = 'COMPLETED'
+    GROUP BY p.id, p.name
+    ORDER BY totalSold DESC
+    LIMIT 5 
+    `;
+
+    return topSellingProducts;
 };
