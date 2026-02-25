@@ -1,7 +1,6 @@
 import z from "zod";
 import { prisma } from "../lib/prisma.js";
 import { Prisma } from "../../generated/prisma/index.js";
-import AppError from "../lib/AppError.js";
 
 export const getRevenue = async (orgId: string, startDate?: Date, endDate?: Date) => {
     const createdAtFilter: Prisma.DateTimeFilter | undefined = 
@@ -54,7 +53,17 @@ export const getDailyRevenueTrend = async (orgId: string) => {
     return trend;
 };
 
-export const getTopSellingProducts = async (orgId: string) => {
+export const getTopSellingProducts = async (orgId: string, startDate?: Date, endDate?: Date) => {
+    let dateFilter = Prisma.empty;
+    
+    if (startDate) {
+        dateFilter = Prisma.sql`AND o."createdAt" >= ${startDate}`
+    };
+
+    if (endDate) {
+        dateFilter = Prisma.sql`${dateFilter} AND o."createdAt" <= ${endDate}`
+    };
+
     const topSellingProducts = await prisma.$queryRaw<{ id: string, name: string, totalSold: number }[]
     >`
     SELECT
@@ -67,6 +76,7 @@ export const getTopSellingProducts = async (orgId: string) => {
     WHERE
         o."orgId" = ${orgId}
         AND o."status" = 'COMPLETED'
+        ${dateFilter}
     GROUP BY p.id, p.name
     ORDER BY totalSold DESC
     LIMIT 5 

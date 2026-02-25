@@ -28,8 +28,10 @@ export const getDailyRevenueTrend = asyncHandler(async (req: Request, res: Respo
 
 export const getTopSellingProducts = asyncHandler(async (req: Request, res: Response) => {
     const orgId = req.org?.id!;
+    const query = req.validated?.query as GetRevenueQuery;
+    const { startDate, endDate } = query;
 
-    const topSellingProducts = await analyticsService.getTopSellingProducts(orgId);
+    const topSellingProducts = await analyticsService.getTopSellingProducts(orgId, startDate, endDate);
 
     res.json({ topSellingProducts });
 });
