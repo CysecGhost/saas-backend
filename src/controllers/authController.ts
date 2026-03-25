@@ -15,10 +15,10 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     const { accessToken, refreshToken } = await authService.loginUser(email, password);
 
     res.cookie("refreshToken", refreshToken, {
-        path: "/auth/refresh",
+        path: "/api/auth/refresh",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 

@@ -50,7 +50,7 @@ export const updateOrderStatus = asyncHandler (async (req: Request, res: Respons
 
     const { updatedOrder } = await orderService.updateOrderStatus(orgId, id, status)
 
-    res.status(201).json({ updatedOrder });
+    res.status(200).json({ updatedOrder });
 });
 
 export const cancelOrder = asyncHandler (async (req: Request, res: Response) => {

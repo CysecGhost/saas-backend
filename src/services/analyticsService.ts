@@ -35,18 +35,27 @@ export const getRevenue = async (orgId: string, startDate?: Date, endDate?: Date
     };
 };
 
-export const getDailyRevenueTrend = async (orgId: string) => {
+export const getDailyRevenueTrend = async (orgId: string, startDate?: Date, endDate?: Date) => {
+    const conditions = [Prisma.sql`o."orgId" = ${orgId}`, Prisma.sql`o.status = 'COMPLETED'`];
+
+    if (startDate) {
+        conditions.push(Prisma.sql`o."createdAt" >= ${startDate}`)
+    };
+
+    if (endDate) {
+        conditions.push(Prisma.sql`o."createdAt" <= ${endDate}`)
+    };
+
     const trend = await prisma.$queryRaw<{ date: Date, revenue: number, orders: number}[]
     >`
-    Select
-        DATE("createdAt") as date,
-        SUM(total) as revenue,
-        COUNT(*) as orders
-    FROM "Order"
+    SELECT
+        DATE_TRUNC('day', "createdAt") as date,
+        SUM(total)::float as revenue,
+        COUNT(*)::int as orders
+    FROM "Order" o
     WHERE
-        "orgId" = ${orgId}
-        AND "status" = 'COMPLETED'
-    GROUP BY DATE("createdAt")
+        ${Prisma.join(conditions, " AND ")}
+    GROUP BY DATE_TRUNC('day', "createdAt")
     ORDER BY date ASC
     `;
 
@@ -54,14 +63,14 @@ export const getDailyRevenueTrend = async (orgId: string) => {
 };
 
 export const getTopSellingProducts = async (orgId: string, startDate?: Date, endDate?: Date) => {
-    let dateFilter = Prisma.empty;
-    
+    const conditions = [Prisma.sql`o."orgId" = ${orgId}`, Prisma.sql`o.status = 'COMPLETED'`];
+
     if (startDate) {
-        dateFilter = Prisma.sql`AND o."createdAt" >= ${startDate}`
+        conditions.push(Prisma.sql`o."createdAt" >= ${startDate}`)
     };
 
     if (endDate) {
-        dateFilter = Prisma.sql`${dateFilter} AND o."createdAt" <= ${endDate}`
+        conditions.push(Prisma.sql`o."createdAt" <= ${endDate}`)
     };
 
     const topSellingProducts = await prisma.$queryRaw<{ id: string, name: string, totalSold: number }[]
@@ -69,14 +78,12 @@ export const getTopSellingProducts = async (orgId: string, startDate?: Date, end
     SELECT
         p.id,
         p.name,
-        SUM(oi.quantity) as totalSold
+        SUM(oi.quantity)::int as totalSold
     FROM "OrderItem" oi
     JOIN "Order" o ON oi."orderId" = o.id
     JOIN "Product" p ON oi."productId" = p.id
     WHERE
-        o."orgId" = ${orgId}
-        AND o."status" = 'COMPLETED'
-        ${dateFilter}
+        ${Prisma.join(conditions, " AND ")}
     GROUP BY p.id, p.name
     ORDER BY totalSold DESC
     LIMIT 5 
