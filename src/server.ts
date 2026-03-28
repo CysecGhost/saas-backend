@@ -1,14 +1,14 @@
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
-import authRoutes from "./routes/authRoutes";
-import orgRoutes from "./routes/orgRoutes";
-import productRoutes from "./routes/productRoutes";
-import orderRoutes from "./routes/orderRoutes";
-import analyticsRoutes from "./routes/analyticsRoutes";
-import authMiddleware from "./middlewares/authMiddleware";
+import authRoutes from "./routes/authRoutes.js";
+import orgRoutes from "./routes/orgRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+import authMiddleware from "./middlewares/authMiddleware.js";
 import cookieParser from "cookie-parser";
-import errorHandler from "./middlewares/errorHandler";
+import errorHandler from "./middlewares/errorHandler.js";
 
 const PORT = Number(process.env.PORT) || 8000;
 
