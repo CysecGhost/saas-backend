@@ -16,7 +16,7 @@ const app = express();
 
 app.use(cookieParser());
 app.use(cors({
-    origin: "https://your-frontend.vercel.app",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
 }));
 app.use(express.json());
