@@ -6,6 +6,8 @@
   "scripts": {
     "seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate",
+    "build": "tsc",
+    "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts"
   },
   "keywords": [],
