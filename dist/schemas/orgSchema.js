@@ -1,14 +1,14 @@
 import { z } from "zod";
-import { Role } from "../../generated/prisma";
+import { Role } from "../../generated/prisma/index.js";
 export const createOrgSchema = z.object({
-    body: z.object({
-        name: z.string().min(1),
-    }),
+  body: z.object({
+    name: z.string().min(1),
+  }),
 });
 export const inviteUserSchema = z.object({
-    body: z.object({
-        email: z.email(),
-        role: z.enum(Role),
-    }),
+  body: z.object({
+    email: z.email(),
+    role: z.enum(Role),
+  }),
 });
 //# sourceMappingURL=orgSchema.js.map
