@@ -1,0 +1,50 @@
+import z from "zod";
+import * as orderService from "../services/orderService.js";
+import { createOrderSchema, getOrdersQuerySchema, orderIdParamSchema, orderStatusSchema } from "../schemas/orderSchema.js";
+import asyncHandler from "express-async-handler";
+export const createOrder = asyncHandler(async (req, res) => {
+    const orgId = req.org?.id;
+    const body = req.validated?.body;
+    const { items } = body;
+    const { order } = await orderService.createOrder(orgId, items);
+    res.status(201).json({ order });
+});
+export const getOrders = asyncHandler(async (req, res) => {
+    const orgId = req.org?.id;
+    const query = req.validated?.query;
+    const { page, limit, status } = query;
+    const skip = (page - 1) * limit;
+    const { orders, pagination } = await orderService.getOrders(orgId, page, limit, skip, status);
+    res.json({ orders, pagination });
+});
+export const getOrderById = asyncHandler(async (req, res) => {
+    const orgId = req.org?.id;
+    const params = req.validated?.params;
+    const { id } = params;
+    const { order } = await orderService.getOrderById(orgId, id);
+    res.json({ order });
+});
+export const updateOrderStatus = asyncHandler(async (req, res) => {
+    const orgId = req.org?.id;
+    const params = req.validated?.params;
+    const { id } = params;
+    const body = req.validated?.body;
+    const { status } = body;
+    const { updatedOrder } = await orderService.updateOrderStatus(orgId, id, status);
+    res.status(200).json({ updatedOrder });
+});
+export const cancelOrder = asyncHandler(async (req, res) => {
+    const orgId = req.org?.id;
+    const params = req.validated?.params;
+    const { id } = params;
+    const { updatedOrder } = await orderService.cancelOrder(orgId, id);
+    res.status(201).json({ updatedOrder });
+});
+export const completeOrder = asyncHandler(async (req, res) => {
+    const orgId = req.org?.id;
+    const params = req.validated?.params;
+    const { id } = params;
+    const { updatedOrder } = await orderService.completeOrder(orgId, id);
+    res.status(201).json({ updatedOrder });
+});
+//# sourceMappingURL=orderController.js.map

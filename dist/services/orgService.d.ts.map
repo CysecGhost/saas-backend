@@ -1,0 +1,1 @@
+{"version":3,"file":"orgService.d.ts","sourceRoot":"","sources":["../../src/services/orgService.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,IAAI,EAAE,MAAM,iCAAiC,CAAC;AAGvD,eAAO,MAAM,SAAS,GAAU,QAAQ,MAAM,EAAE,MAAM,MAAM;;;;;;;EAkB3D,CAAC;AAEF,eAAO,MAAM,OAAO,GAAU,QAAQ,MAAM;;;;;;EAuB3C,CAAC;AAEF,eAAO,MAAM,UAAU,GAAU,OAAO,MAAM,EAAE,OAAO,MAAM,EAAE,MAAM,IAAI;;;;;;;EAsCxE,CAAC"}

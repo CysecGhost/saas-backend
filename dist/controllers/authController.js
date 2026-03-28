@@ -1,0 +1,51 @@
+import * as authService from "../services/authService.js";
+import AppError from "../lib/AppError.js";
+import asyncHandler from "express-async-handler";
+export const register = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    const user = await authService.registerUser(email, password);
+    res.status(201).json(user);
+});
+export const login = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+    const { accessToken, refreshToken } = await authService.loginUser(email, password);
+    res.cookie("refreshToken", refreshToken, {
+        path: "/api/auth/refresh",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    res.json({ accessToken });
+});
+export const refresh = asyncHandler(async (req, res) => {
+    const token = req.cookies.refreshToken;
+    if (!token) {
+        throw new AppError("No refresh token", 401);
+    }
+    const { accessToken, refreshToken } = await authService.refreshAccessToken(token);
+    res.cookie("refreshToken", refreshToken, {
+        path: "/api/auth/refresh",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+    res.json({ accessToken });
+});
+export const logout = asyncHandler(async (req, res) => {
+    const token = req.cookies.refreshToken;
+    if (!token) {
+        throw new AppError("No refresh token", 401);
+    }
+    await authService.logoutUser(token);
+    res.clearCookie("refreshToken", {
+        path: "/api/auth/refresh",
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "none",
+        expires: new Date(0),
+    });
+    res.json({ message: "Logged out successfully" });
+});
+//# sourceMappingURL=authController.js.map
