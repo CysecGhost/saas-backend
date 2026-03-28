@@ -27,7 +27,7 @@ export const loginUser = async (email: string, password: string) => {
     if (!valid) throw new AppError("Invalid credentials", 401);
 
     const accessToken = signAccessToken( { userId: user.id } );
-    const refreshToken = signRefreshToken( { userId: user.id } )
+    const refreshToken = signRefreshToken( { userId: user.id } );
 
     const tokenHash = await bcrypt.hash(refreshToken, 12);
 

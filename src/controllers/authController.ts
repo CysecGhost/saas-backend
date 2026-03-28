@@ -18,7 +18,7 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
         path: "/api/auth/refresh",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        sameSite: "none",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -35,10 +35,10 @@ export const refresh = asyncHandler(async (req: Request, res: Response) => {
     const { accessToken, refreshToken} = await authService.refreshAccessToken(token);
 
     res.cookie("refreshToken", refreshToken, {
-        path: "/auth/refresh",
+        path: "/api/auth/refresh",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "none",
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -55,10 +55,10 @@ export const logout = asyncHandler(async (req: Request, res: Response) => {
     await authService.logoutUser(token);
 
     res.clearCookie("refreshToken", {
-        path: "/auth/refresh",
+        path: "/api/auth/refresh",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "none",
         expires: new Date(0),
     });
 
